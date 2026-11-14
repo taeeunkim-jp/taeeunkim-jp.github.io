@@ -72,7 +72,9 @@ const SITE = {
   ],
 
   /* ---------- 논문 (최신 것을 맨 위에) ----------
-     authors 는 공저일 때만 적습니다(단독 저자면 생략). links 로 DOI·PDF 링크를 달 수 있습니다. */
+     authors 는 공저일 때만 적습니다(단독 저자면 생략).
+     url 을 적으면 제목을 눌렀을 때 그 주소(논문 페이지)로 넘어갑니다. 발표·저작·강의 등 다른 목록에서도 똑같이 쓸 수 있습니다.
+     제목 아래에 PDF·Code 같은 버튼을 더 달고 싶으면 links: [ { label: "PDF", url: "files/paper.pdf" }, ] 를 추가합니다. */
   papers: [
     {
       date: "2026.08",
@@ -82,9 +84,7 @@ const SITE = {
       },
       authors: "Juhyun Lee, Taeeun Kim, Hyejun Lee",
       venue: "Journal of Social Sciences, 19(2), 303–331",
-      links: [
-        { label: "DOI", url: "https://doi.org/10.54540/jss19.2.9" },
-      ],
+      url: "https://doi.org/10.54540/jss19.2.9",
     },
     {
       date: "2023",

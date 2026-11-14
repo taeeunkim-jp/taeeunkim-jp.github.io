@@ -148,7 +148,10 @@
       const body = el("div");
       if (it.text) body.appendChild(el("div", "", t(it.text)));
       if (it.title) {
-        const title = el("div", "title", t(it.title));
+        // url 이 있으면 제목을 누를 수 있는 링크로 만듭니다.
+        const title = el("div", "title");
+        if (it.url) title.appendChild(link(t(it.title), it.url));
+        else title.textContent = t(it.title);
         if (it.invited) title.appendChild(el("span", "badge", L.invited));
         body.appendChild(title);
       }
