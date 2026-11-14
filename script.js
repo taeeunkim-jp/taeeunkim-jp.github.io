@@ -37,6 +37,16 @@
   };
   const L = LABELS[LANG];
 
+  // 왼쪽 메뉴와, 각 메뉴를 눌렀을 때 보여 줄 섹션들. 맨 앞의 메뉴가 첫 화면입니다.
+  const TABS = {
+    about: ["about", "news", "research"],
+    papers: ["papers"],
+    misc: ["misc"],
+    presentations: ["presentations"],
+    teaching: ["teaching"],
+    cv: ["cv"],
+  };
+
   // { en: "...", ja: "...", ko: "..." } 에서 지금 언어의 글을 고릅니다. 없으면 다른 언어의 글을 씁니다.
   function t(v) {
     if (v == null) return "";
@@ -72,10 +82,10 @@
   // 다른 언어 페이지로 가는 버튼
   const sw = document.getElementById("lang-switch");
   sw.textContent = "";
-  ORDER.slice(1).forEach((l) => {
+  const langLinks = ORDER.slice(1).map((l) => {
     const a = link(LANG_NAMES[l], PAGES[l]);
     a.lang = l;
-    sw.appendChild(a);
+    return sw.appendChild(a);
   });
 
   const photo = document.getElementById("photo");
@@ -104,10 +114,9 @@
 
   function section(id) {
     const sec = el("section");
-    sec.id = id;
+    sec.id = "sec-" + id;
     sec.appendChild(el("h2", "", L[id]));
     main.appendChild(sec);
-    nav.appendChild(link(L[id], "#" + id));
     return sec;
   }
 
@@ -199,6 +208,29 @@
     });
     if (S.cv) sec.appendChild(link(L.cvDownload, S.cv, "button"));
   }
+
+  /* ---------- 왼쪽 메뉴: 누른 메뉴의 내용만 보여 줍니다 ---------- */
+  const find = (id) => document.getElementById("sec-" + id);
+  const tabs = Object.keys(TABS).filter((tab) => TABS[tab].some(find)); // 내용이 있는 메뉴만
+  const tabLinks = {};
+  tabs.forEach((tab) => { tabLinks[tab] = nav.appendChild(link(L[tab], "#" + tab)); });
+
+  function show() {
+    const wanted = location.hash.slice(1);
+    const current = tabs.includes(wanted) ? wanted : tabs[0];
+    tabs.forEach((tab) => {
+      TABS[tab].forEach((id) => { if (find(id)) find(id).hidden = tab !== current; });
+      tabLinks[tab].classList.toggle("active", tab === current);
+      if (tab === current) tabLinks[tab].setAttribute("aria-current", "page");
+      else tabLinks[tab].removeAttribute("aria-current");
+    });
+    document.body.dataset.tab = current;
+    // 언어를 바꿔도 보고 있던 메뉴가 유지되게 합니다.
+    langLinks.forEach((a) => { a.href = PAGES[a.lang] + (current === tabs[0] ? "" : "#" + current); });
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener("hashchange", show);
+  show();
 
   document.getElementById("footer").textContent =
     "© " + new Date().getFullYear() + " " + (S.name.en || name);
