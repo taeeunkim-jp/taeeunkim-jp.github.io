@@ -1,9 +1,12 @@
 /* content.js 의 내용을 읽어서 화면을 그립니다. 평소에는 고칠 필요가 없습니다.
-   index.html 은 영어(en), ja.html 은 일본어(ja)로 그려집니다. */
+   index.html 은 영어(en), ja.html 은 일본어(ja), ko.html 은 한국어(ko)로 그려집니다. */
 (function () {
   const S = SITE;
-  const LANG = document.documentElement.lang === "ja" ? "ja" : "en";
-  const OTHER = LANG === "ja" ? "en" : "ja";
+  const PAGES = { en: "index.html", ja: "ja.html", ko: "ko.html" };
+  const LANG_NAMES = { en: "English", ja: "日本語", ko: "한국어" };
+  const LANG = PAGES[document.documentElement.lang] ? document.documentElement.lang : "en";
+  // 지금 언어의 글이 없을 때 대신 쓸 언어의 순서
+  const ORDER = [LANG].concat(Object.keys(PAGES).filter((l) => l !== LANG));
 
   // 섹션 제목 등 화면에 고정으로 나오는 낱말
   const LABELS = {
@@ -14,7 +17,6 @@
       qualifications: "Fellowships, Programs & Qualifications", memberships: "Memberships",
       outreach: "Social Contribution", cvDownload: "Download CV (PDF)",
       present: "Present", invited: "Invited", nav: "Sections",
-      switchLabel: "日本語", switchHref: "ja.html", switchLang: "ja",
     },
     ja: {
       about: "プロフィール", news: "お知らせ", research: "研究", papers: "論文",
@@ -23,16 +25,24 @@
       qualifications: "フェローシップ・プログラム・資格", memberships: "所属学協会",
       outreach: "社会貢献活動", cvDownload: "履歴書（PDF）",
       present: "現在", invited: "招待", nav: "セクション",
-      switchLabel: "English", switchHref: "index.html", switchLang: "en",
+    },
+    ko: {
+      about: "소개", news: "소식", research: "연구", papers: "논문",
+      misc: "기타 저작", presentations: "학회 발표", teaching: "강의 경력", cv: "이력",
+      experience: "경력", education: "학력", awards: "수상",
+      qualifications: "장학금 · 프로그램 · 자격", memberships: "소속 학회",
+      outreach: "사회 공헌 활동", cvDownload: "이력서 (PDF)",
+      present: "현재", invited: "초청", nav: "섹션",
     },
   };
   const L = LABELS[LANG];
 
-  // { en: "...", ja: "..." } 에서 지금 언어의 글을 고릅니다. 없으면 다른 언어의 글을 씁니다.
+  // { en: "...", ja: "...", ko: "..." } 에서 지금 언어의 글을 고릅니다. 없으면 다른 언어의 글을 씁니다.
   function t(v) {
     if (v == null) return "";
     if (typeof v === "string") return v;
-    return v[LANG] || v[OTHER] || "";
+    for (const l of ORDER) if (v[l]) return v[l];
+    return "";
   }
 
   // 태그를 만드는 작은 도우미: el("p", "클래스", "글자")
@@ -59,10 +69,14 @@
   document.querySelector('meta[name="description"]').content =
     [name, t(S.nameSub), t(S.position), t(S.affiliation)].filter(Boolean).join(" · ");
 
+  // 다른 언어 페이지로 가는 버튼
   const sw = document.getElementById("lang-switch");
-  sw.textContent = L.switchLabel;
-  sw.href = L.switchHref;
-  sw.lang = L.switchLang;
+  sw.textContent = "";
+  ORDER.slice(1).forEach((l) => {
+    const a = link(LANG_NAMES[l], PAGES[l]);
+    a.lang = l;
+    sw.appendChild(a);
+  });
 
   const photo = document.getElementById("photo");
   if (S.photo) {
